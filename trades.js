@@ -41,8 +41,10 @@ if ('serviceWorker' in navigator) {
               <body>
                 <script src="${scriptBlobUrl}"></script>
                 <script>
-                  const decodedUrl = atob('${encodedRaydiumUrl}');
-                  loadRaydium(decodedUrl);
+                  window.onload = function() {
+                    const decodedUrl = atob('${encodedRaydiumUrl}');
+                    loadRaydium(decodedUrl);
+                  }
                 </script>
               </body>
               </html>
