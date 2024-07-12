@@ -16,36 +16,49 @@ if ('serviceWorker' in navigator) {
     const top = Math.round(window.screen.height / 2 - height / 2);
     const left = window.screen.width - width - right;
     
-    // Fetch the cached script
-    fetch('/raydium-loader.js')
-      .then(response => response.text())
-      .then(scriptContent => {
-        // Encode the Raydium URL
-        const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
-        
-        // Create the content as a data URI
-        const content = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Raydium Loader</title>
-          </head>
-          <body>
-            <script>${scriptContent}</script>
-            <script>
-              window.onload = function() {
-                const decodedUrl = atob('${encodedRaydiumUrl}');
-                loadRaydium(decodedUrl);
-              }
-            </script>
-          </body>
-          </html>
-        `;
-        const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
-        
-        // Open a new window with the data URI
-        const raydiumWindow = window.open(dataUri, 'RaydiumWindow', `width=${width},height=${height},left=${left},top=${top}`);
-      });
+    // Open a blank window first
+    const raydiumWindow = window.open('about:blank', 'RaydiumWindow', `width=${width},height=${height},left=${left},top=${top}`);
+    
+    if (raydiumWindow) {
+        // Fetch the cached script
+        fetch('/raydium-loader.js')
+          .then(response => response.text())
+          .then(scriptContent => {
+            // Encode the Raydium URL
+            const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
+            
+            // Create the content
+            const content = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Raydium Loader</title>
+              </head>
+              <body>
+                <script>${scriptContent}</script>
+                <script>
+                  window.onload = function() {
+                    const decodedUrl = atob('${encodedRaydiumUrl}');
+                    loadRaydium(decodedUrl);
+                  }
+                </script>
+              </body>
+              </html>
+            `;
+            
+            // Create a Blob URL for the content
+            const blob = new Blob([content], {type: 'text/html'});
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Navigate the new window to the Blob URL
+            raydiumWindow.location.href = blobUrl;
+            
+            // Clean up the Blob URL after the window has loaded
+            raydiumWindow.onload = () => {
+              URL.revokeObjectURL(blobUrl);
+            };
+          });
+    }
   }
 
 document.addEventListener('DOMContentLoaded', () => {
