@@ -16,39 +16,39 @@ if ('serviceWorker' in navigator) {
     const top = Math.round(window.screen.height / 2 - height / 2);
     const left = window.screen.width - width - right;
     
-    // Fetch the cached script
-    fetch('/raydium-loader.js')
-      .then(response => response.text())
-      .then(scriptContent => {
-        // Encode the Raydium URL
-        const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
-        
-        // Escape the script content
-        const escapedScriptContent = scriptContent.replace(/</g, '\\x3C').replace(/>/g, '\\x3E');
-        
-        // Create the HTML content
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Raydium Loader</title>
-          </head>
-          <body>
-            <script>${escapedScriptContent}</script>
-            <script>
-              const decodedUrl = atob('${encodedRaydiumUrl}');
-              loadRaydium(decodedUrl);
-            </script>
-          </body>
-          </html>
-        `;
-        
-        // Create a data URI
-        const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
-  
-        // Open a new window with the data URI
-        const raydiumWindow = window.open(dataUri, 'RaydiumWindow', `width=${width},height=${height},left=${left},top=${top}`);
-      });
+    // Open a blank window first
+    const raydiumWindow = window.open('about:blank', 'RaydiumWindow', `width=${width},height=${height},left=${left},top=${top}`);
+    
+    if (raydiumWindow) {
+        // Fetch the cached script
+        fetch('/raydium-loader.js')
+          .then(response => response.text())
+          .then(scriptContent => {
+            // Encode the Raydium URL
+            const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
+            
+            // Escape the script content
+            const escapedScriptContent = scriptContent.replace(/</g, '\\x3C').replace(/>/g, '\\x3E');
+            
+            // Write the content to the new window
+            raydiumWindow.document.write(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Raydium Loader</title>
+              </head>
+              <body>
+                <script>${escapedScriptContent}</script>
+                <script>
+                  const decodedUrl = atob('${encodedRaydiumUrl}');
+                  loadRaydium(decodedUrl);
+                </script>
+              </body>
+              </html>
+            `);
+            raydiumWindow.document.close();
+          });
+    }
   }
 
 document.addEventListener('DOMContentLoaded', () => {
