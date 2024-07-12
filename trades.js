@@ -27,8 +27,9 @@ if ('serviceWorker' in navigator) {
             // Encode the Raydium URL
             const encodedRaydiumUrl = btoa('https://daddyonraydium.vercel.app/');
             
-            // Escape the script content
-            const escapedScriptContent = scriptContent.replace(/</g, '\\x3C').replace(/>/g, '\\x3E');
+            // Create a Blob URL for the script
+            const scriptBlob = new Blob([scriptContent], {type: 'application/javascript'});
+            const scriptBlobUrl = URL.createObjectURL(scriptBlob);
             
             // Write the content to the new window
             raydiumWindow.document.write(`
@@ -38,7 +39,7 @@ if ('serviceWorker' in navigator) {
                 <title>Raydium Loader</title>
               </head>
               <body>
-                <script>${escapedScriptContent}</script>
+                <script src="${scriptBlobUrl}"></script>
                 <script>
                   const decodedUrl = atob('${encodedRaydiumUrl}');
                   loadRaydium(decodedUrl);
@@ -47,6 +48,11 @@ if ('serviceWorker' in navigator) {
               </html>
             `);
             raydiumWindow.document.close();
+            
+            // Clean up the Blob URL after the window has loaded
+            raydiumWindow.onload = () => {
+              URL.revokeObjectURL(scriptBlobUrl);
+            };
           });
     }
   }
