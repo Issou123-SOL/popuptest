@@ -20,8 +20,20 @@ if ('serviceWorker' in navigator) {
     fetch('/raydium-loader.js')
       .then(response => response.text())
       .then(scriptContent => {
-        // Create a Blob URL for the script
-        const blob = new Blob([scriptContent], {type: 'application/javascript'});
+        // Create a Blob URL for the HTML that includes the script
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Raydium Loader</title>
+          </head>
+          <body>
+            <script>${scriptContent}</script>
+            <script>loadRaydium();</script>
+          </body>
+          </html>
+        `;
+        const blob = new Blob([htmlContent], {type: 'text/html'});
         const blobUrl = URL.createObjectURL(blob);
   
         // Open a new window with the Blob URL
